@@ -15,7 +15,6 @@ import android.os.PowerManager
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import androidx.core.widget.TextViewCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -23,25 +22,12 @@ class ClockScreen : Activity(), View.OnClickListener {
 
     private lateinit var clockView: TextView
 
-    private var isClockViewFixed: Boolean = false
-
     private val hmFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-//            Log.d(TAG, "onReceive() called with: context = [$context], intent.action = [${intent.action}]")
             when (intent.action) {
-                Intent.ACTION_TIME_TICK -> {
-                    val timeText = hmFormat.format(Date())
-                    clockView.text = timeText
-                    // 1 has a narrower width than the other numbers.So if you turn 1 to 2 without autosizing...
-                    if (!isClockViewFixed && "1" !in timeText) {
-                        // Fix the view for lower power consumption.
-                        Log.d(TAG, "onReceive: [ClockView] size=" + clockView.textSize.toInt())
-                        TextViewCompat.setAutoSizeTextTypeWithDefaults(clockView, TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE)
-                        isClockViewFixed = true
-                    }
-                }
+                Intent.ACTION_TIME_TICK -> clockView.text = hmFormat.format(Date())
                 // Open app -> Press power btn -> Screen Off -> Press power btn -> Screen On -> Unlock ->
                 // (Navigator bar will show again).
                 Intent.ACTION_USER_PRESENT -> configSysUiFlags()
