@@ -67,9 +67,7 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     override fun onClick(v: View) {
-        if (v.id == R.id.clock_view) {
-            if (loadCalendar) CalendarDialog.show()
-        }
+        if (v.id == R.id.clock_view) if (loadCalendar) CalendarDialog.show()
     }
 
     companion object {

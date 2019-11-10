@@ -12,6 +12,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:includeFontPadding="false"
+        android:layerType="software"
         android:maxLines="1"
         android:textColor="@android:color/white"
         android:textIsSelectable="true"

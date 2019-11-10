@@ -22,6 +22,8 @@ public class CalendarDialog {
 
     private static DatePickerDialog mDialog;
 
+    private static boolean isDialogConfigDone;
+
     static boolean create(Context context, DialogInterface.OnCancelListener cancelCallback) {
         mDialog = new DatePickerDialog(context,
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
@@ -38,13 +40,17 @@ public class CalendarDialog {
         DatePicker datePicker = mDialog.getDatePicker();
         Log.i(TAG, "show: Today is " + Arrays.asList(year, month + 1, date));
         datePicker.updateDate(year, month, date);
-        // Hide "Set Date".
-        mDialog.setTitle(null);
-        // Hide "Done" and "Cancel".
-        Message nullMsg = Message.obtain();
-        mDialog.setButton(AlertDialog.BUTTON_POSITIVE, null, nullMsg);
-        mDialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
         datePicker.setEnabled(false);
+        if (!isDialogConfigDone) {
+            Log.d(TAG, "show: Config dialog attrs");
+            // Hide "Set Date".
+            mDialog.setTitle(null);
+            // Hide "Done" and "Cancel".
+            Message nullMsg = Message.obtain();
+            mDialog.setButton(AlertDialog.BUTTON_POSITIVE, null, nullMsg);
+            mDialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
+            isDialogConfigDone = true;
+        }
         mDialog.show();
     }
 
