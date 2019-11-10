@@ -1,8 +1,6 @@
 package github.ryuunoakaihitomi.hmclockscreen
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.app.DatePickerDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -10,7 +8,6 @@ import android.content.IntentFilter
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.os.Message
 import android.os.PowerManager
 import android.util.Log
 import android.view.View
@@ -22,12 +19,17 @@ class ClockScreen : Activity(), View.OnClickListener {
 
     private lateinit var clockView: TextView
 
+    private val loadCalendar by lazy {
+        Log.v(TAG, "loadCalendar")
+        CalendarDialog.create(this) { configSysUiFlags() }
+    }
+
     private val hmFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
-                Intent.ACTION_TIME_TICK -> clockView.text = hmFormat.format(Date())
+                Intent.ACTION_TIME_TICK -> synchronizeClock()
                 // Open app -> Press power btn -> Screen Off -> Press power btn -> Screen On -> Unlock ->
                 // (Navigator bar will show again).
                 Intent.ACTION_USER_PRESENT -> configSysUiFlags()
@@ -47,7 +49,10 @@ class ClockScreen : Activity(), View.OnClickListener {
 
     override fun onStart() {
         super.onStart()
-        clockView.text = hmFormat.format(Date())
+        synchronizeClock()
+        // ClockView seems not to automatically get the focus on 9+.
+        // We have to use double-click to show calendar dialog at the first time while app is running.
+        clockView.requestFocus()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_TIME_TICK)
         filter.addAction(Intent.ACTION_USER_PRESENT)
@@ -58,30 +63,12 @@ class ClockScreen : Activity(), View.OnClickListener {
         super.onStop()
         unregisterReceiver(broadcastReceiver)
         if ((getSystemService(Context.POWER_SERVICE) as PowerManager).isScreenOn) finish()
-        else Log.w(TAG, "onStop: Clock is invisible caused !isScreenOn.Won't exit.")
+        else Log.w(TAG, "onStop: Clock is invisible caused !isScreenOn.Won't exit")
     }
 
     override fun onClick(v: View) {
-        // Show a calendar dialog with the current date.
         if (v.id == R.id.clock_view) {
-            val calendar = Calendar.getInstance()
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            val date = calendar.get(Calendar.DATE)
-            val datePickerDialog = DatePickerDialog(this,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                        android.R.style.Theme_DeviceDefault_Dialog_Alert
-                    else AlertDialog.THEME_DEVICE_DEFAULT_DARK,
-                    null, year, month, date)
-            // Hide "Set Date".
-            datePickerDialog.setTitle(null)
-            // Hide "Done" and "Cancel".
-            val nullMsg = Message.obtain()
-            datePickerDialog.setButton(AlertDialog.BUTTON_POSITIVE, null, nullMsg)
-            datePickerDialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg)
-            datePickerDialog.datePicker.isEnabled = false
-            datePickerDialog.setOnDismissListener { configSysUiFlags() }
-            datePickerDialog.show()
+            if (loadCalendar) CalendarDialog.show()
         }
     }
 
@@ -97,5 +84,14 @@ class ClockScreen : Activity(), View.OnClickListener {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH)
             flags += View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         window.decorView.systemUiVisibility = flags
+    }
+
+    private fun synchronizeClock() {
+        clockView.text = hmFormat.format(Date())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CalendarDialog.destroy()
     }
 }
