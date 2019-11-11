@@ -14,4 +14,4 @@
 
 ## Copy the current time `Long press`
 
-![screenshots](screenshots/Screenshot_2019-11-07-19-45-37.png)
+![screenshot](screenshots/Screenshot_2019-11-07-19-45-37.png)
