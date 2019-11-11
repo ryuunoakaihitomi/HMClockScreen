@@ -1,10 +1,7 @@
 package github.ryuunoakaihitomi.hmclockscreen
 
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -91,5 +88,13 @@ class ClockScreen : Activity(), View.OnClickListener {
     override fun onDestroy() {
         super.onDestroy()
         CalendarDialog.destroy()
+    }
+
+    // 4 dbg
+    override fun onTrimMemory(level: Int) {
+        var levelStr: String = level.toString()
+        for (f in ComponentCallbacks2::class.java.fields) if (f.get(null) == level) levelStr = f.name
+        Log.w(TAG, "onTrimMemory: $levelStr")
+        super.onTrimMemory(level)
     }
 }

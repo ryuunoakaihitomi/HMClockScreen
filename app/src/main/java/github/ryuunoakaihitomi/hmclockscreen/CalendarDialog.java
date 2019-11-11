@@ -22,7 +22,15 @@ public class CalendarDialog {
 
     private static DatePickerDialog mDialog;
 
-    private static boolean isDialogConfigDone;
+    /**
+     * Note:In some case,for example,
+     * use overview btn to exit app while cal dialog is visible and reopen it from the recent apps list.
+     * mDialog may be destroyed and will be recreate when needed.
+     * But the marker bit(isDialogConfigDone) is still true.It will lead the show() not to config the attrs the dialog should be.
+     *
+     * @see android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN
+     */
+    private static int mId;
 
     static boolean create(Context context, DialogInterface.OnCancelListener cancelCallback) {
         int themeResId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
@@ -47,15 +55,18 @@ public class CalendarDialog {
         Log.i(TAG, "show: Today is " + Arrays.asList(year, month + 1, date));
         datePicker.updateDate(year, month, date);
         datePicker.setEnabled(false);
-        if (!isDialogConfigDone) {
-            Log.d(TAG, "show: Config dialog attrs");
+        int newHashId = mDialog.hashCode();
+        if (mId != newHashId) {
+            Log.d(TAG, "show: Configure dialog attributes");
             // Hide "Set Date".
             mDialog.setTitle(null);
             // Hide "Done" and "Cancel".
             Message nullMsg = Message.obtain();
             mDialog.setButton(AlertDialog.BUTTON_POSITIVE, null, nullMsg);
             mDialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
-            isDialogConfigDone = true;
+            if (mId != 0)
+                Log.v(TAG, "show: Hashcode changed. It's a new dialog! " + mId + " -> " + newHashId);
+            mId = newHashId;
         }
         mDialog.show();
     }
