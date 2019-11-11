@@ -25,16 +25,22 @@ public class CalendarDialog {
     private static boolean isDialogConfigDone;
 
     static boolean create(Context context, DialogInterface.OnCancelListener cancelCallback) {
-        mDialog = new DatePickerDialog(context,
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
-                        android.R.style.Theme_DeviceDefault_Dialog_Alert :
-                        AlertDialog.THEME_DEVICE_DEFAULT_DARK,
-                null, 0, 0, 0);
+        int themeResId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
+                android.R.style.Theme_DeviceDefault_Dialog_Alert :
+                AlertDialog.THEME_DEVICE_DEFAULT_DARK;
+        // On 8.0+,if we use constructor(context,themeResId,listener,year,monthOfYear,dayOfMonth) to create DatePickerDialog,
+        // using getDatePicker().updateDate() to update the date will only work for the label(left side)
+        // and will not take effect on the calendar(right side).
+        // But the issue will be fixed when we use constructor(context,themeResId) instead.
+        mDialog = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
+                new DatePickerDialog(context, themeResId) :
+                new DatePickerDialog(context, themeResId, null, 0, 0, 0);
         mDialog.setOnCancelListener(cancelCallback);
         return true;
     }
 
     static void show() {
+        if (mDialog == null) return;
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR), month = calendar.get(Calendar.MONTH), date = calendar.get(Calendar.DATE);
         DatePicker datePicker = mDialog.getDatePicker();
