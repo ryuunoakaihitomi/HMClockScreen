@@ -1,15 +1,27 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'AndResGuard'
 
 android {
+    signingConfigs {
+        arg {
+            Properties p = new Properties()
+            p.load(new FileReader(new File(rootDir, "signInfo.properties")))
+            keyAlias p['KEY_ALIAS']
+            keyPassword p['KEY_PWD']
+            storePassword p['STORE_PWD']
+            storeFile file(p['STORE_FILE'])
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "github.ryuunoakaihitomi.hmclockscreen"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 6
-        versionName "1.5"
+        versionCode 7
+        versionName "1.6"
+        resConfigs "en"
     }
     buildTypes {
         release {
@@ -17,6 +29,7 @@ android {
             shrinkResources true
             zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.arg
         }
     }
 }
@@ -33,4 +46,24 @@ android.applicationVariants.all { variant ->
     variant.outputs.all {
         outputFileName = "${variant.applicationId}-${variant.versionCode}_${variant.buildType.name}.apk"
     }
+}
+
+andResGuard {
+    mappingFile = null
+    use7zip = true
+    useSign = true
+    keepRoot = false
+    fixedResName = "x"
+    mergeDuplicatedRes = true
+    whiteList = [
+            "R.mipmap.ic_launcher",
+            "R.mipmap.ic_launcher_round"
+    ]
+    compressFilePattern = [
+            "*.png"
+    ]
+    sevenzip {
+        artifact = 'com.tencent.mm:SevenZip:1.2.17'
+    }
+    digestalg = "SHA-256"
 }

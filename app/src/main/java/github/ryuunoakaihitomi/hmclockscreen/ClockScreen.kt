@@ -8,13 +8,11 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.util.Log
 import android.view.View
-import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ClockScreen : Activity(), View.OnClickListener {
-
-    private lateinit var clockView: TextView
 
     private val loadCalendar by lazy {
         Log.v(TAG, "loadCalendar")
@@ -38,10 +36,9 @@ class ClockScreen : Activity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         configSysUiFlags()
-        clockView = findViewById(R.id.clock_view)
         // Center the time separator completely.
-        clockView.setTypeface(Typeface.createFromAsset(assets, "AndroidClock.ttf"), Typeface.BOLD)
-        clockView.setOnClickListener(this)
+        clock_view.setTypeface(Typeface.createFromAsset(assets, "AndroidClock.ttf"), Typeface.BOLD)
+        clock_view.setOnClickListener(this)
     }
 
     override fun onStart() {
@@ -49,7 +46,7 @@ class ClockScreen : Activity(), View.OnClickListener {
         synchronizeClock()
         // ClockView seems not to automatically get the focus on 9+.
         // We have to use double-click to show calendar dialog at the first time while app is running.
-        clockView.requestFocus()
+        clock_view.requestFocus()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_TIME_TICK)
         filter.addAction(Intent.ACTION_USER_PRESENT)
@@ -82,7 +79,7 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     private fun synchronizeClock() {
-        clockView.text = hmFormat.format(Date())
+        clock_view.text = hmFormat.format(Date())
     }
 
     override fun onDestroy() {
@@ -93,7 +90,11 @@ class ClockScreen : Activity(), View.OnClickListener {
     // 4 dbg
     override fun onTrimMemory(level: Int) {
         var levelStr: String = level.toString()
-        for (f in ComponentCallbacks2::class.java.fields) if (f.get(null) == level) levelStr = f.name
+        for (f in ComponentCallbacks2::class.java.fields)
+            if (f.get(null) == level) {
+                levelStr = f.name
+                break
+            }
         Log.w(TAG, "onTrimMemory: $levelStr")
         super.onTrimMemory(level)
     }
