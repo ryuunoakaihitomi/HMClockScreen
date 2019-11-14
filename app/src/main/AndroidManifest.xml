@@ -14,13 +14,17 @@
         android:allowBackup="false"
         android:banner="@null"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
         <activity
             android:name=".ClockScreen"
+            android:excludeFromRecents="true"
+            android:immersive="true"
+            android:noHistory="true"
+            android:resizeableActivity="false"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

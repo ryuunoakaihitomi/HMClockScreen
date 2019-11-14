@@ -69,8 +69,7 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     private fun configSysUiFlags() {
-        var flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        var flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         // On 5.0+,the flags will lead the ui to show a blank area for nav bar instead of hiding it completely.
         // But on 4.4,it will prevent the contraction of clockView's font when the calendar dialog is showing.
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH)
