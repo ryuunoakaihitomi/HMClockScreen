@@ -7,18 +7,22 @@ android {
     signingConfigs {
         arg {
             Properties p = new Properties()
-            p.load(new FileReader(new File(rootDir, "signInfo.properties")))
-            keyAlias p['KEY_ALIAS']
-            keyPassword p['KEY_PWD']
-            storePassword p['STORE_PWD']
-            storeFile file(p['STORE_FILE'])
+            File f = new File(rootDir, "signInfo.properties")
+            if (f.exists()) {
+                p.load(new FileReader(f))
+                keyAlias p['KEY_ALIAS']
+                keyPassword p['KEY_PWD']
+                storePassword p['STORE_PWD']
+                storeFile file(p['STORE_FILE'])
+            } else println 'If you want to build the app in a smaller size with AndResGuard,' +
+                    'you must create signInfo.properties before.'
         }
     }
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "github.ryuunoakaihitomi.hmclockscreen"
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 7
         versionName "1.6"
         resConfigs "en"
@@ -37,9 +41,6 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}
-repositories {
-    mavenCentral()
 }
 
 android.applicationVariants.all { variant ->
