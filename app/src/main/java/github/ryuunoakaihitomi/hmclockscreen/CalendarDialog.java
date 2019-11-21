@@ -40,6 +40,7 @@ public class CalendarDialog {
         // using getDatePicker().updateDate() to update the date will only work for the label(left side)
         // and will not take effect on the calendar(right side).
         // But the issue will be fixed when we use constructor(context,themeResId) instead.
+        // p.s. In fact,the situation is very rare.It can only reproduce when the initial value of year < 2,maybe...
         mDialog = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
                 new DatePickerDialog(context, themeResId) :
                 new DatePickerDialog(context, themeResId, null, 0, 0, 0);
