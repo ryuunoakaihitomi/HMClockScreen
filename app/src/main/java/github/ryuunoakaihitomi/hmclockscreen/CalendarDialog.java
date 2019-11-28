@@ -35,7 +35,11 @@ public class CalendarDialog {
     static boolean create(Context context, DialogInterface.OnCancelListener cancelCallback) {
         int themeResId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
                 android.R.style.Theme_DeviceDefault_Dialog_Alert :
-                AlertDialog.THEME_DEVICE_DEFAULT_DARK;
+                // On 5.0,AlertDialog.THEME_DEVICE_DEFAULT_DARK will let the the calendar(right side) be truncated.
+                // (Sun -> Thu & Fri)
+                Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP ?
+                        android.R.style.Theme_Material_Dialog :
+                        AlertDialog.THEME_DEVICE_DEFAULT_DARK;
         // On 8.0+,if we use constructor(context,themeResId,listener,year,monthOfYear,dayOfMonth) to create DatePickerDialog,
         // using getDatePicker().updateDate() to update the date will only work for the label(left side)
         // and will not take effect on the calendar(right side).
