@@ -6,7 +6,7 @@
 
 ## HH:mm-style
 
-![screenshot](screenshots\Screenshot_2020-03-02-22-21-23.png)
+![screenshot](screenshots/Screenshot_2020-03-02-22-21-23.png)
 
 ## Calendar dialog `Click`
 
