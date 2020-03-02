@@ -1,16 +1,22 @@
 package github.ryuunoakaihitomi.hmclockscreen
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
 import android.graphics.Typeface
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.pow
 
 class ClockScreen : Activity(), View.OnClickListener {
 
@@ -20,14 +26,34 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     private val hmFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private lateinit var mBatteryInfo: Bundle
 
     private val broadcastReceiver = object : BroadcastReceiver() {
+        @SuppressLint("SetTextI18n")
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 Intent.ACTION_TIME_TICK -> synchronizeClock()
                 // Open app -> Press power btn -> Screen Off -> Press power btn -> Screen On -> Unlock ->
                 // (Navigator bar will show again).
                 Intent.ACTION_USER_PRESENT -> configSysUiFlags()
+                Intent.ACTION_BATTERY_CHANGED -> {
+                    val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                    val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100)
+                    val batteryLevelPercent = percentage(level, scale)
+                    val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+                    val isBatteryExist = status != BatteryManager.BATTERY_STATUS_UNKNOWN
+                    if (!isBatteryExist) {
+                        Log.i(TAG, "onReceive: battery is not exists")
+                        battery_label.visibility = View.INVISIBLE
+                        return
+                    } else battery_label.visibility = View.VISIBLE
+                    val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
+                            || status == BatteryManager.BATTERY_STATUS_FULL
+                    // BatteryManager.EXTRA_ICON_SMALL is too ugly.
+                    val symbol = if (isCharging) "🔌" else "🔋"
+                    mBatteryInfo = intent.extras ?: Bundle()
+                    battery_label.text = "$symbol$batteryLevelPercent%"
+                }
             }
         }
     }
@@ -39,6 +65,10 @@ class ClockScreen : Activity(), View.OnClickListener {
         // Center the time separator completely.
         clock_view.setTypeface(Typeface.createFromAsset(assets, "AndroidClock.ttf"), Typeface.BOLD)
         clock_view.setOnClickListener(this)
+        battery_label.setOnLongClickListener {
+            Toast.makeText(application, bundle2String4Display(mBatteryInfo), Toast.LENGTH_LONG).show()
+            true
+        }
     }
 
     override fun onStart() {
@@ -50,6 +80,7 @@ class ClockScreen : Activity(), View.OnClickListener {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_TIME_TICK)
         filter.addAction(Intent.ACTION_USER_PRESENT)
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED)
         registerReceiver(broadcastReceiver, filter)
     }
 
@@ -61,7 +92,7 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     override fun onClick(v: View) {
-        if (v.id == R.id.clock_view) if (loadCalendar) CalendarDialog.show()
+        if (v.id == clock_view.id) if (loadCalendar) CalendarDialog.show()
     }
 
     companion object {
@@ -96,5 +127,17 @@ class ClockScreen : Activity(), View.OnClickListener {
             }
         Log.w(TAG, "onTrimMemory: $levelStr")
         super.onTrimMemory(level)
+    }
+
+    private fun percentage(part: Int, total: Int): Int {
+        val ratio: BigDecimal = BigDecimal.valueOf(part.toFloat() / total * 10.0.pow(2))
+        return ratio.setScale(0, RoundingMode.HALF_UP).toInt()
+    }
+
+    private fun bundle2String4Display(bundle: Bundle): String {
+        if (BuildConfig.DEBUG) Log.d(TAG, "bundle2String4Display: $bundle")
+        var extrasString = String()
+        for (key in bundle.keySet()) extrasString += "$key: ${bundle[key]}${System.lineSeparator()}"
+        return extrasString
     }
 }

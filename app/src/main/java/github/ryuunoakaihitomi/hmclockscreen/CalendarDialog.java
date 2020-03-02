@@ -20,7 +20,7 @@ public class CalendarDialog {
 
     private static final String TAG = "CalendarDialog";
 
-    private static DatePickerDialog mDialog;
+    private static DatePickerDialog sDialog;
 
     /**
      * Note:In some case,for example,
@@ -45,18 +45,18 @@ public class CalendarDialog {
         // and will not take effect on the calendar(right side).
         // But the issue will be fixed when we use constructor(context,themeResId) instead.
         // p.s. In fact,the situation is very rare.It can only reproduce when the initial value of year < 2,maybe...
-        mDialog = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
+        sDialog = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
                 new DatePickerDialog(context, themeResId) :
                 new DatePickerDialog(context, themeResId, null, 0, 0, 0);
-        mDialog.setOnCancelListener(cancelCallback);
-        return true;
+        sDialog.setOnCancelListener(cancelCallback);
+        return sDialog != null;
     }
 
     static void show() {
-        if (mDialog == null) return;
+        if (sDialog == null) return;
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR), month = calendar.get(Calendar.MONTH), date = calendar.get(Calendar.DATE);
-        DatePicker datePicker = mDialog.getDatePicker();
+        DatePicker datePicker = sDialog.getDatePicker();
         Log.i(TAG, "show: Today is " + Arrays.asList(year, month + 1, date));
         datePicker.updateDate(year, month, date);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) datePicker.setEnabled(false);
@@ -66,26 +66,35 @@ public class CalendarDialog {
             datePicker.setMaxDate(now);
             datePicker.setMinDate(now);
         }
-        int newHashId = mDialog.hashCode();
+        int newHashId = sDialog.hashCode();
         if (mId != newHashId) {
             Log.d(TAG, "show: Configure dialog attributes");
+
+            // Style List:
+            //  19        Title + Done (Tablet)
+            //  21-23     Title + Cancel + OK
+            //  24-29(+)  Cancel + OK
+
             // Hide "Set Date".
-            mDialog.setTitle(null);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+                sDialog.setTitle(null);
             // Hide "Done" and "Cancel".
             Message nullMsg = Message.obtain();
-            mDialog.setButton(AlertDialog.BUTTON_POSITIVE, null, nullMsg);
-            mDialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
+            sDialog.setButton(AlertDialog.BUTTON_POSITIVE, null, nullMsg);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT)
+                sDialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
+
             if (mId != 0)
                 Log.v(TAG, "show: Hashcode changed. It's a new dialog! " + mId + " -> " + newHashId);
             mId = newHashId;
         }
-        mDialog.show();
+        sDialog.show();
     }
 
     static void destroy() {
-        if (mDialog != null) {
-            mDialog.dismiss();
-            mDialog = null;
+        if (sDialog != null) {
+            sDialog.dismiss();
+            sDialog = null;
         }
     }
 }

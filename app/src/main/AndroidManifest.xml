@@ -25,7 +25,8 @@
             android:immersive="true"
             android:noHistory="true"
             android:resizeableActivity="false"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
