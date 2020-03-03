@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+
+<!--Must use FrameLayout instead of merge to keep keepScreenOn effect. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:keepScreenOn="true">
+    android:keepScreenOn="true"
+    tools:ignore="MergeRootFrame">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/clock_view"
@@ -28,4 +32,4 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/white" />
 
-</merge>
+</FrameLayout>
