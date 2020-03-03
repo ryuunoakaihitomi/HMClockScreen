@@ -30,7 +30,7 @@ public class CalendarDialog {
      *
      * @see android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN
      */
-    private static int mId;
+    private static int sId;
 
     static boolean create(Context context, DialogInterface.OnCancelListener cancelCallback) {
         int themeResId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
@@ -67,7 +67,7 @@ public class CalendarDialog {
             datePicker.setMinDate(now);
         }
         int newHashId = sDialog.hashCode();
-        if (mId != newHashId) {
+        if (sId != newHashId) {
             Log.d(TAG, "show: Configure dialog attributes");
 
             // Style List:
@@ -84,9 +84,9 @@ public class CalendarDialog {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT)
                 sDialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
 
-            if (mId != 0)
-                Log.v(TAG, "show: Hashcode changed. It's a new dialog! " + mId + " -> " + newHashId);
-            mId = newHashId;
+            if (sId != 0)
+                Log.v(TAG, "show: Hashcode changed. It's a new dialog! " + sId + " -> " + newHashId);
+            sId = newHashId;
         }
         sDialog.show();
     }
