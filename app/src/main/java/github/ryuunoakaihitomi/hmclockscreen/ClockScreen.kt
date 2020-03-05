@@ -7,7 +7,6 @@ import android.graphics.Typeface
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -17,6 +16,7 @@ import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.pow
+import kotlin.system.exitProcess
 
 class ClockScreen : Activity(), View.OnClickListener {
 
@@ -43,7 +43,7 @@ class ClockScreen : Activity(), View.OnClickListener {
                     val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
                     val isBatteryExist = status != BatteryManager.BATTERY_STATUS_UNKNOWN
                     if (!isBatteryExist) {
-                        Log.i(TAG, "onReceive: battery is not exists")
+                        Log.i(TAG, "onReceive: Battery is not exists")
                         battery_label.visibility = View.INVISIBLE
                         return
                     } else battery_label.visibility = View.VISIBLE
@@ -69,6 +69,19 @@ class ClockScreen : Activity(), View.OnClickListener {
             Toast.makeText(application, bundle2String4Display(mBatteryInfo), Toast.LENGTH_LONG).show()
             true
         }
+        // Too difficult to select the text before 23, copy it directly.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            clock_view.setOnLongClickListener {
+                it.clearFocus()
+                (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                        .setPrimaryClip(ClipData.newPlainText(null, clock_view.text))
+                Toast.makeText(application,
+                        // System string resource: "Text copied to clipboard."
+                        resources.getIdentifier("text_copied", "string", "android"),
+                        Toast.LENGTH_SHORT).show()
+                true
+            }
+        }
     }
 
     override fun onStart() {
@@ -77,6 +90,10 @@ class ClockScreen : Activity(), View.OnClickListener {
         // ClockView seems not to automatically get the focus on 9+.
         // We have to use double-click to show calendar dialog at the first time while app is running.
         clock_view.requestFocus()
+    }
+
+    override fun onResume() {
+        super.onResume()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_TIME_TICK)
         filter.addAction(Intent.ACTION_USER_PRESENT)
@@ -84,11 +101,12 @@ class ClockScreen : Activity(), View.OnClickListener {
         registerReceiver(broadcastReceiver, filter)
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        Log.i(TAG, "onPause: [  ]")
         unregisterReceiver(broadcastReceiver)
-        if ((getSystemService(Context.POWER_SERVICE) as PowerManager).isScreenOn) finish()
-        else Log.w(TAG, "onStop: Clock is invisible caused !isScreenOn.Won't exit")
+        super.onPause()
+        // WHY DISTURB ME?
+        exitProcess(0)
     }
 
     override fun onClick(v: View) {
@@ -117,7 +135,6 @@ class ClockScreen : Activity(), View.OnClickListener {
         CalendarDialog.destroy()
     }
 
-    // 4 dbg
     override fun onTrimMemory(level: Int) {
         var levelStr: String = level.toString()
         for (f in ComponentCallbacks2::class.java.fields)
