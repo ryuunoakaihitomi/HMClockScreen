@@ -59,9 +59,10 @@ public class CalendarDialog {
         DatePicker datePicker = sDialog.getDatePicker();
         Log.i(TAG, "show: Today is " + Arrays.asList(year, month + 1, date));
         datePicker.updateDate(year, month, date);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) datePicker.setEnabled(false);
-        else {
-            // datePicker.setEnabled() doesn't work on 5.0+,and datePicker.set(Max/Min)Date can only change look on 5.0.
+        datePicker.setEnabled(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // datePicker.setEnabled() doesn't work properly on 5.0+(Can only let year label be unavailable),
+            // but datePicker.set(Max/Min)Date can't limit the scope on 5.0.
             long now = System.currentTimeMillis();
             datePicker.setMaxDate(now);
             datePicker.setMinDate(now);

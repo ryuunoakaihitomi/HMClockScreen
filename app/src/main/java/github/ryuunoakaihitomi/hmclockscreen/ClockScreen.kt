@@ -75,8 +75,8 @@ class ClockScreen : Activity(), View.OnClickListener {
                 it.clearFocus()
                 (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                         .setPrimaryClip(ClipData.newPlainText(null, clock_view.text))
+                // text_copied: System string resource: "Text copied to clipboard."
                 Toast.makeText(application,
-                        // System string resource: "Text copied to clipboard."
                         resources.getIdentifier("text_copied", "string", "android"),
                         Toast.LENGTH_SHORT).show()
                 true
