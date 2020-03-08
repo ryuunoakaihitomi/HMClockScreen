@@ -26,16 +26,13 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     private val hmFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    private lateinit var mBatteryInfo: Bundle
+    private lateinit var batteryInfo: Bundle
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         @SuppressLint("SetTextI18n")
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 Intent.ACTION_TIME_TICK -> synchronizeClock()
-                // Open app -> Press power btn -> Screen Off -> Press power btn -> Screen On -> Unlock ->
-                // (Navigator bar will show again).
-                Intent.ACTION_USER_PRESENT -> configSysUiFlags()
                 Intent.ACTION_BATTERY_CHANGED -> {
                     val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                     val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100)
@@ -51,7 +48,7 @@ class ClockScreen : Activity(), View.OnClickListener {
                             || status == BatteryManager.BATTERY_STATUS_FULL
                     // BatteryManager.EXTRA_ICON_SMALL is too ugly.
                     val symbol = if (isCharging) "🔌" else "🔋"
-                    mBatteryInfo = intent.extras ?: Bundle()
+                    batteryInfo = intent.extras ?: Bundle()
                     battery_label.text = "$symbol$batteryLevelPercent%"
                 }
             }
@@ -66,7 +63,7 @@ class ClockScreen : Activity(), View.OnClickListener {
         clock_view.setTypeface(Typeface.createFromAsset(assets, "AndroidClock.ttf"), Typeface.BOLD)
         clock_view.setOnClickListener(this)
         battery_label.setOnLongClickListener {
-            Toast.makeText(application, bundle2String4Display(mBatteryInfo), Toast.LENGTH_LONG).show()
+            Toast.makeText(application, bundle2String4Display(batteryInfo), Toast.LENGTH_LONG).show()
             true
         }
         // Too difficult to select the text before 23, copy it directly.
@@ -96,7 +93,6 @@ class ClockScreen : Activity(), View.OnClickListener {
         super.onResume()
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_TIME_TICK)
-        filter.addAction(Intent.ACTION_USER_PRESENT)
         filter.addAction(Intent.ACTION_BATTERY_CHANGED)
         registerReceiver(broadcastReceiver, filter)
     }
