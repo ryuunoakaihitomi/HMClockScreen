@@ -20,11 +20,6 @@ import kotlin.system.exitProcess
 
 class ClockScreen : Activity(), View.OnClickListener {
 
-    private val loadCalendar by lazy {
-        Log.v(TAG, "loadCalendar")
-        CalendarDialog.create(this) { configSysUiFlags() }
-    }
-
     private val hmFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     private lateinit var batteryInfo: Bundle
 
@@ -50,6 +45,11 @@ class ClockScreen : Activity(), View.OnClickListener {
                     val symbol = if (isCharging) "🔌" else "🔋"
                     batteryInfo = intent.extras ?: Bundle()
                     battery_label.text = "$symbol$batteryLevelPercent%"
+                }
+                Intent.ACTION_BATTERY_LOW -> {
+                    Log.w(TAG, "onReceive: Intent.ACTION_BATTERY_LOW info = ${bundle2String4Display(batteryInfo)}")
+                    // Exit to protect battery.
+                    exitProcess(0)
                 }
             }
         }
@@ -94,6 +94,7 @@ class ClockScreen : Activity(), View.OnClickListener {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_TIME_TICK)
         filter.addAction(Intent.ACTION_BATTERY_CHANGED)
+        filter.addAction(Intent.ACTION_BATTERY_LOW)
         registerReceiver(broadcastReceiver, filter)
     }
 
@@ -106,7 +107,7 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     override fun onClick(v: View) {
-        if (v.id == clock_view.id) if (loadCalendar) CalendarDialog.show()
+        if (v.id == clock_view.id) CalendarDialog.create(this) { configSysUiFlags() }
     }
 
     companion object {
@@ -124,11 +125,6 @@ class ClockScreen : Activity(), View.OnClickListener {
 
     private fun synchronizeClock() {
         clock_view.text = hmFormat.format(Date())
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        CalendarDialog.destroy()
     }
 
     override fun onTrimMemory(level: Int) {
