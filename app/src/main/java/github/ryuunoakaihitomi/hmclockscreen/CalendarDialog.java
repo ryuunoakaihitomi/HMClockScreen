@@ -40,9 +40,8 @@ public class CalendarDialog {
         /* ------- show ------- */
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR), month = calendar.get(Calendar.MONTH), date = calendar.get(Calendar.DATE);
-        DatePicker datePicker = dialog.getDatePicker();
         Log.i(TAG, "show: Today is " + Arrays.asList(year, month + 1, date));
-        datePicker.updateDate(year, month, date);
+        DatePicker datePicker = dialog.getDatePicker();
         datePicker.setEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // datePicker.setEnabled() doesn't work properly on 5.0+(Can only let year label be unavailable),
