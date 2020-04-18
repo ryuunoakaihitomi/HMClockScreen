@@ -45,6 +45,8 @@ class ClockScreen : Activity(), View.OnClickListener {
                     val symbol = if (isCharging) "🔌" else "🔋"
                     batteryInfo = intent.extras ?: Bundle()
                     battery_label.text = "$symbol$batteryLevelPercent%"
+                    // Log for recording
+                    Log.i(TAG, "onReceive: Intent.ACTION_BATTERY_CHANGED -> $symbol$batteryLevelPercent")
                 }
                 Intent.ACTION_BATTERY_LOW -> {
                     Log.w(TAG, "onReceive: Intent.ACTION_BATTERY_LOW info = ${bundle2String4Display(batteryInfo)}")

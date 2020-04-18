@@ -28,19 +28,13 @@ public class CalendarDialog {
                 Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP ?
                         android.R.style.Theme_Material_Dialog :
                         AlertDialog.THEME_DEVICE_DEFAULT_DARK;
-        // On 8.0+,if we use constructor(context,themeResId,listener,year,monthOfYear,dayOfMonth) to create DatePickerDialog,
-        // using getDatePicker().updateDate() to update the date will only work for the label(left side)
-        // and will not take effect on the calendar(right side).
-        // But the issue will be fixed when we use constructor(context,themeResId) instead.
-        // p.s. In fact,the situation is very rare.It can only reproduce when the initial value of year < 2,maybe...
-        DatePickerDialog dialog = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
-                new DatePickerDialog(context, themeResId) :
-                new DatePickerDialog(context, themeResId, null, 0, 0, 0);
-        dialog.setOnCancelListener(cancelCallback);
-        /* ------- show ------- */
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR), month = calendar.get(Calendar.MONTH), date = calendar.get(Calendar.DATE);
-        Log.i(TAG, "show: Today is " + Arrays.asList(year, month + 1, date));
+        Log.i(TAG, "create: Today is " + Arrays.asList(year, month + 1, date));
+        DatePickerDialog dialog = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
+                new DatePickerDialog(context, themeResId) :
+                new DatePickerDialog(context, themeResId, null, year, month, date);
+        dialog.setOnCancelListener(cancelCallback);
         DatePicker datePicker = dialog.getDatePicker();
         datePicker.setEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -62,9 +56,9 @@ public class CalendarDialog {
         // Hide "Done" and "Cancel".
         Message nullMsg = Message.obtain();
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, null, nullMsg);
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT)
-            dialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
-
+        // For compatibility in 4.4 Samsung mobile env (Showing "Cancel" btn)
+        // and 5.0+
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, null, nullMsg);
         Log.i(TAG, "create: " + dialog);
         dialog.show();
     }
