@@ -20,6 +20,9 @@ public class CalendarDialog {
 
     private static final String TAG = "CalendarDialog";
 
+    private CalendarDialog() {
+    }
+
     static void create(Context context, DialogInterface.OnCancelListener cancelCallback) {
         int themeResId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
                 android.R.style.Theme_DeviceDefault_Dialog_Alert :
