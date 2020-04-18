@@ -21,7 +21,7 @@ import kotlin.system.exitProcess
 class ClockScreen : Activity(), View.OnClickListener {
 
     private val hmFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    private lateinit var batteryInfo: Bundle
+    private var batteryInfo = Bundle()
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         @SuppressLint("SetTextI18n")
