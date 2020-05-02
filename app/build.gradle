@@ -23,8 +23,8 @@ android {
         applicationId "github.ryuunoakaihitomi.hmclockscreen"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 19
-        versionName "2.2.2"
+        versionCode 20
+        versionName "3.0"
         resConfigs "en"
     }
     buildTypes {

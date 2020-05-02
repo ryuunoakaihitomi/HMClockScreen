@@ -7,20 +7,22 @@ import android.graphics.Typeface
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import github.ryuunoakaihitomi.hmclockscreen.Utils.bundle2String4Display
+import github.ryuunoakaihitomi.hmclockscreen.Utils.percentage
 import kotlinx.android.synthetic.main.activity_main.*
-import java.math.BigDecimal
-import java.math.RoundingMode
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.pow
 import kotlin.system.exitProcess
 
 class ClockScreen : Activity(), View.OnClickListener {
 
-    private val hmFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    companion object {
+        private const val TAG = "ClockScreen"
+    }
+
     private var batteryInfo = Bundle()
 
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -39,14 +41,11 @@ class ClockScreen : Activity(), View.OnClickListener {
                         battery_label.visibility = View.INVISIBLE
                         return
                     } else battery_label.visibility = View.VISIBLE
+                    // https://developer.android.com/training/monitoring-device-state/battery-monitoring#DetermineChargeState
                     val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
                             || status == BatteryManager.BATTERY_STATUS_FULL
                     // BatteryManager.EXTRA_ICON_SMALL is too ugly.
                     val symbol = if (isCharging) "🔌" else "🔋"
-                    /* Log for recording */
-                    if (batteryInfo[BatteryManager.EXTRA_LEVEL] != level)
-                        Log.i(TAG, "onReceive: 🔋 $batteryLevelPercent")
-
                     batteryInfo = intent.extras ?: Bundle()
                     battery_label.text = "$symbol$batteryLevelPercent%"
                 }
@@ -114,10 +113,6 @@ class ClockScreen : Activity(), View.OnClickListener {
         if (v.id == clock_view.id) CalendarDialog.create(this) { configSysUiFlags() }
     }
 
-    companion object {
-        private const val TAG = "ClockScreen"
-    }
-
     private fun configSysUiFlags() {
         var flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         // On 5.0+,the flags will lead the ui to show a blank area for nav bar instead of hiding it completely.
@@ -128,29 +123,6 @@ class ClockScreen : Activity(), View.OnClickListener {
     }
 
     private fun synchronizeClock() {
-        clock_view.text = hmFormat.format(Date())
-    }
-
-    override fun onTrimMemory(level: Int) {
-        var levelStr: String = level.toString()
-        for (f in ComponentCallbacks2::class.java.fields)
-            if (f.get(null) == level) {
-                levelStr = f.name
-                break
-            }
-        Log.w(TAG, "onTrimMemory: $levelStr")
-        super.onTrimMemory(level)
-    }
-
-    private fun percentage(part: Int, total: Int): Int {
-        val ratio: BigDecimal = BigDecimal.valueOf(part.toFloat() / total * 10.0.pow(2))
-        return ratio.setScale(0, RoundingMode.HALF_UP).toInt()
-    }
-
-    private fun bundle2String4Display(bundle: Bundle): String {
-        if (BuildConfig.DEBUG) Log.d(TAG, "bundle2String4Display: $bundle")
-        var extrasString = String()
-        for (key in bundle.keySet()) extrasString += "$key: ${bundle[key]}${System.lineSeparator()}"
-        return extrasString
+        clock_view.text = DateFormat.format("HH:mm", Date())
     }
 }
